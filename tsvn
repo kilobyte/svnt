@@ -5,16 +5,21 @@
 #
 #    Copyright (C) 2003-2004 Ross Mark
 #
+#    Changes:
+#      2006-06-13 Adam Borowski:
+#        file:timestamp.  It's currently stored as seconds past epoch,
+#        losing any fractional parts; this preserves portability at the cost
+#        of accuracy.
 #-------------------------------------------------------------------------
 #
 #    Description:
 #    Archive SVN (asvn) will allow the recording of file types not
 #    normally handled by svn. Currently this includes devices,
-#    symlinks and file ownership/permissions.
+#    symlinks, file ownership/permissions and timestamps.
 #
-#    Every file and directory has a 'file:permissions' property set and
-#    every directory has a 'dir:devices' and 'dir:symlinks' for
-#    recording the extra information.
+#    Every file and directory has a 'file:permissions' and 'file:timestamp'
+#    properties set and every directory has a 'dir:devices' and
+#    'dir:symlinks' for recording the extra information.
 #	
 #    Run this script instead of svn with the normal svn arguments.
 #
@@ -36,17 +41,18 @@
 #
 #
 #-------------------------------------------------------------------------
-SVN=/usr/local/bin/svn
+SVN=/usr/bin/svn
 ACTION=""
 DEV_PROP="dir:devices"
 SYM_PROP="dir:symlinks"
 FILE_PROP="file:permissions"
+TIME_PROP="file:timestamp"
 TMPFILE=/tmp/asvn.tmp.$$
 TMPFILE1=/tmp/asvn.tmp1.$$
 TMPFILE2=/tmp/asvn.tmp2.$$
 PCWD=`/bin/pwd`
 SKIPSVN='\( -name .svn -prune -false \)'
-PRINTDETAILS="-printf \"file='%p' mode=%m user=%u(%U) group=%g(%G)\n\""
+PRINTDETAILS="-printf \"file='%p' mode=%m user=%u(%U) group=%g(%G) time=%T@\n\""
 
 trap cleanup 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20
 
@@ -316,7 +322,8 @@ function recordpermissions()
     eval "find $PCWD $SKIPSVN -o \( \( -type d ! -name .svn  \) -o -type f \) $PRINTDETAILS" | while read info
     do
 	device=`expr "$info" : "file='\(.*\)' mode"`
-	info=`expr "$info" : "file='.*' \(mode.*\)"`
+	timestamp=`expr "$info" : "file='.*' mode.* time=\([0-9]\+\)"`
+	info=`expr "$info" : "file='.*' \(mode.*\) time="`
 	if [ "$PCWD" = "$device" ]
 	then
 	    dir="."
@@ -342,8 +349,26 @@ function recordpermissions()
 		then
 		    echo "property $FILE_PROP not set for $dir/$file"
 		else
-		    chown $user:$group  $dir/$file
-		    chmod $mode $dir/$file
+		    chown "$user:$group" "$dir/$file"
+		    chmod "$mode" "$dir/$file"
+		fi
+	    fi
+	fi
+	# same for the timestamp
+	secs="`$SVN propget $TIME_PROP $dir/$file`"
+	secs=`expr "$secs" : "\([0-9]\+\)"` #forward compat: 1234.000000 is ok
+	echo "SECS: [$secs]"
+	if [ "$secs" != "$timestamp" ]
+	then
+	    if [ "$CHECKIN" = "true" ]
+	    then
+		$SVN propset $TIME_PROP  "$timestamp" $dir/$file
+	    else
+		if [ -n "$secs" ]
+		then
+		    echo "property $TIME_PROP not set for $dir/$file"
+		else
+		    touch -d "1970-01-01 UTC $secs seconds" "$dir/$file"
 		fi
 	    fi
 	fi
