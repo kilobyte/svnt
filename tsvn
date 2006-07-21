@@ -13,6 +13,10 @@
 #      2006-06-15 Adam Borowski:
 #        storing permissions and/or timestamps can be crudely controlled
 #        by editing this file and changing STORE_{PERMS,TIMES}
+#      2006-07-21 Adam Borowski:
+#        bugfix: running 'update' or friends would overwrite the timestamps of
+#        locally modified files, losing them and also triggering a grave data
+#        loss bug in svn
 #-------------------------------------------------------------------------
 #
 #    Description:
@@ -365,7 +369,7 @@ function recordpermissions()
 	# same for the timestamp
 	if $STORE_TIMES
 	then
-            secs="`$SVN propget $TIME_PROP $dir/$file`"
+            secs="`$SVN propget $TIME_PROP $dir/$file 2>/dev/null`" || continue
             secs=`expr "$secs" : "\([0-9]\+\)"` #forward compat: 1234.000000 is ok
             if [ "$secs" != "$timestamp" ]
             then
@@ -377,7 +381,15 @@ function recordpermissions()
                     then
                         echo "property $TIME_PROP not set for $dir/$file"
                     else
-                        touch -d "1970-01-01 UTC $secs seconds" "$dir/$file"
+                    	#bug: dirs get always restored even if they got local mods
+                        if [ -d "$dir/$file" ] || cmp -s "$dir/$file" "$dir/.svn/text-base/$file.svn-base"
+                        then
+                            echo -n "Updating date for $dir/$file to "
+                            date -d "1970-01-01 UTC $secs seconds"
+                            touch -d "1970-01-01 UTC $secs seconds" "$dir/$file"
+                        else
+                            echo "File $dir/$file has local mods, not updating the timestamp"
+                        fi
                     fi
                 fi
             fi
