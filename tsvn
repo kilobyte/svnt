@@ -17,6 +17,8 @@
 #        bugfix: running 'update' or friends would overwrite the timestamps of
 #        locally modified files, losing them and also triggering a grave data
 #        loss bug in svn
+#      2007-05-22 Adam Borowski:
+#        removed timestamping of dirs, it causes WAY too much hassle
 #-------------------------------------------------------------------------
 #
 #    Description:
@@ -367,7 +369,7 @@ function recordpermissions()
             fi
         fi
 	# same for the timestamp
-	if $STORE_TIMES
+	if $STORE_TIMES && [ ! -d "$dir/$file"]
 	then
             secs="`$SVN propget $TIME_PROP $dir/$file 2>/dev/null`" || continue
             secs=`expr "$secs" : "\([0-9]\+\)"` #forward compat: 1234.000000 is ok
@@ -381,8 +383,7 @@ function recordpermissions()
                     then
                         echo "property $TIME_PROP not set for $dir/$file"
                     else
-                    	#bug: dirs get always restored even if they got local mods
-                        if [ -d "$dir/$file" ] || cmp -s "$dir/$file" "$dir/.svn/text-base/$file.svn-base"
+                        if cmp -s "$dir/$file" "$dir/.svn/text-base/$file.svn-base"
                         then
                             echo -n "Updating date for $dir/$file to "
                             date -d "1970-01-01 UTC $secs seconds"
