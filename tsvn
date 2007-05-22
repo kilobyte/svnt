@@ -369,7 +369,7 @@ function recordpermissions()
             fi
         fi
 	# same for the timestamp
-	if $STORE_TIMES && [ ! -d "$dir/$file"]
+	if $STORE_TIMES && [ ! -d "$dir/$file" ]
 	then
             secs="`$SVN propget $TIME_PROP $dir/$file 2>/dev/null`" || continue
             secs=`expr "$secs" : "\([0-9]\+\)"` #forward compat: 1234.000000 is ok
