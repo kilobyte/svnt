@@ -19,6 +19,8 @@
 #        loss bug in svn
 #      2007-05-22 Adam Borowski:
 #        removed timestamping of dirs, it causes WAY too much hassle
+#      2007-05-22 Adam Borowski:
+#        non-empty files without changes don't get their timestamps touched
 #-------------------------------------------------------------------------
 #
 #    Description:
@@ -377,7 +379,12 @@ function recordpermissions()
             then
                 if [ "$CHECKIN" = "true" ]
                 then
-                    $SVN propset $TIME_PROP  "$timestamp" $dir/$file
+                    if [ -s "$dir/$file" ] && cmp -s "$dir/$file" "$dir/.svn/text-base/$file.svn-base"
+                    then
+                        echo "Non-empty file $dir/$file has no real mods, not changing the timestamp"
+                    else
+                        $SVN propset $TIME_PROP  "$timestamp" $dir/$file
+                    fi
                 else
                     if [ -z "$secs" ]
                     then
