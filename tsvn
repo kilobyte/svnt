@@ -60,6 +60,7 @@ FILE_PROP="file:permissions"
 TIME_PROP="file:timestamp"
 STORE_PERMS=false
 STORE_TIMES=true
+STORE_SPECS=false
 TMPFILE=/tmp/asvn.tmp.$$
 TMPFILE1=/tmp/asvn.tmp1.$$
 TMPFILE2=/tmp/asvn.tmp2.$$
@@ -409,7 +410,7 @@ function recordpermissions()
 function pre_checkin()
 {
     echo this is the pre checkin process
-    recorddirinfo -ci
+    if $STORE_SPECS;then recorddirinfo -ci;fi
     recordpermissions -ci
 }
 
@@ -422,7 +423,7 @@ function post_checkout()
 	cd $1
     PCWD="$PCWD/$1"
     fi
-    recorddirinfo 
+    if $STORE_SPECS;then recorddirinfo;fi
     recordpermissions 
 }
 
