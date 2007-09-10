@@ -1,9 +1,8 @@
 #!/bin/bash
 #-------------------------------------------------------------------------
-#    Author:		Ross Mark (rossm@controllingedge.com.au)
-#    Date:		Tue Mar 11 10:02:57 EST 2003
+#    Author:		Adam Borowski <kilobyte@angband.pl>
 #
-#    Copyright (C) 2003-2004 Ross Mark
+#    Copyright (C) 2003-2004 Ross Mark, 2006-2007 Adam Borowski
 #
 #    Changes:
 #      2006-06-13 Adam Borowski:
@@ -24,13 +23,14 @@
 #-------------------------------------------------------------------------
 #
 #    Description:
-#    Archive SVN (asvn) will allow the recording of file types not
-#    normally handled by svn. Currently this includes devices,
-#    symlinks, file ownership/permissions and timestamps.
+#    Timestamp SVN (tsvn) allows the recording of timestamps not
+#    normally handled by svn.  It also retains all of functionality
+#    of its parent, Archive SVN (asvn) by Ross Mark, although that is
+#    disabled by default.
 #
-#    Every file and directory has a 'file:permissions' and 'file:timestamp'
-#    properties set and every directory has a 'dir:devices' and
-#    'dir:symlinks' for recording the extra information.
+#    Every file has a 'file:timestamp' property, which stores the mtime
+#    as number of seconds since 1970-01-01 GMT, with an optional fractional
+#    part (currently ignored).
 #	
 #    Run this script instead of svn with the normal svn arguments.
 #
