@@ -20,10 +20,12 @@
 #        removed timestamping of dirs, it causes WAY too much hassle
 #      2007-05-22 Adam Borowski:
 #        non-empty files without changes don't get their timestamps touched
+#      2007-12-09 Adam Borowski:
+#        rename to svnt, to avoid confusion with TortoiseSVN
 #-------------------------------------------------------------------------
 #
 #    Description:
-#    Timestamp SVN (tsvn) allows the recording of timestamps not
+#    Timestamp SVN (svnt) allows the recording of timestamps not
 #    normally handled by svn.  It also retains all of functionality
 #    of its parent, Archive SVN (asvn) by Ross Mark, although that is
 #    disabled by default.
@@ -409,14 +411,14 @@ function recordpermissions()
 
 function pre_checkin()
 {
-    echo this is the pre checkin process
+    echo svnt: pre-checkin process
     if $STORE_SPECS;then recorddirinfo -ci;fi
     recordpermissions -ci
 }
 
 function post_checkout()
 {
-    echo this is the post checkout process
+    echo svnt: post-checkout process
     if [ "$CHDIR" = "true" ]
     then
 	shift $(($# -1))
