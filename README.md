@@ -9,8 +9,8 @@ outright or set them to the time the file in question was last committed to
 the repository.  For many projects that's enough, but if you either want to
 preserve a significant chunk of history prior to migration to SVN or want to
 keep out-of-SVN timestamps for some reason, you're currently out of luck. 
-Subversion guys are working on this problem, yet their fix has still a long
-time before it's polished enough.
+Subversion guys promised to work on this problem, yet over a decade later,
+not only there's no fix but SVN itself has became completely obsolete.
 
 This is where svnt steps in.  It's nothing but a crude hack, though.
 
