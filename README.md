@@ -38,3 +38,8 @@ many cases.  An empty file, though, is considered as a stamp of some sort
 and thus will have its mtime heeded.  Directories are completely ignored.
 
 Credits: plenty of code in svnt comes from Mark Ross' "asvn".
+
+Git
+===
+
+For the git equivalent, please "apt install git-restore-mtime".
